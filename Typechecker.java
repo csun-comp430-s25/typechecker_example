@@ -1,4 +1,21 @@
 public class Typechecker {
+    public static Map<Variable, Type> typecheck(Stmt stmt, Map<Variable, Type> env) throws TypeErrorException {
+        if (stmt instanceof WhileStmt ws) {
+            if (typeOf(ws.guard, env) instanceof BoolType) {
+                typecheck(ws.body, env);
+                return env;
+            } else {
+                throw new TypeErrorException("Guard non-boolean");
+            }
+        } else if (stmt instanceof BlockStmt block) {
+            Map<Variable, Type> innerEnv = env;
+            // for (int index = 0; index < block.stmts.size(); index++) {
+            //     Stmt innerStmt = block.get(index);                
+            for (Stmt innerStmt : block.stmts) {
+                innerEnv = typecheck(innerStmt, innerEnv);
+            }
+            return env;
+        } // TODO: variable declaration   
     public static Type typeOf(final Exp e, final Map<Variable, Type> env) throws TypeErrorException {
         if (e instanceof VarExp ve) {
             final Variable name = ve.v;
