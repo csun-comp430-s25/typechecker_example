@@ -1,4 +1,19 @@
+import java.util.Map;
+import java.util.HashMap;
+
 public class Typechecker {
+    public static Map<Variable, Type> addMap(Map<Variable, Type> env, Variable var, Type type) {
+        final Map<Variable, Type> retval = new HashMap<Variable, Type>(env);
+        retval.put(var, type);
+        return retval;
+        // if (!retval.containsKey(var)) {
+        //     retval.put(var, type);
+        //     return retval;
+        // } else {
+        //     throw new TypeErrorException("variable already in scope: " + var);
+        // }
+    }
+    
     public static Map<Variable, Type> typecheck(Stmt stmt, Map<Variable, Type> env) throws TypeErrorException {
         if (stmt instanceof WhileStmt ws) {
             if (typeOf(ws.guard, env) instanceof BoolType) {
@@ -15,7 +30,19 @@ public class Typechecker {
                 innerEnv = typecheck(innerStmt, innerEnv);
             }
             return env;
-        } // TODO: variable declaration   
+        } else if (stmt instanceof VarDecStmt vds) {
+            final Type receivedType = typeOf(vds.exp, env);
+            if (receivedType.equals(vds.type)) {
+                return addMap(env, vds.var, receivedType);
+            } else {
+                throw new TypeErrorException("Received type: " + receivedType);
+            }
+        } else {
+            assert false;
+            throw new TypeErrorException("No such statement: " + stmt);
+        }
+    }
+            
     public static Type typeOf(final Exp e, final Map<Variable, Type> env) throws TypeErrorException {
         if (e instanceof VarExp ve) {
             final Variable name = ve.v;
@@ -55,5 +82,9 @@ public class Typechecker {
         } else {
             throw new TypeErrorException("Unknown expression");
         }
+    }
+
+    public static void typechecks(Program p) throws TypeErrorException {
+        typecheck(p.stmt, new HashMap<Variable, Type>());
     }
 }

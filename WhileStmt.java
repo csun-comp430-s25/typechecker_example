@@ -1,2 +1,2 @@
 public record WhileStmt(Exp guard,
-                        Stmt body) {}
+                        Stmt body) implements Stmt {}
